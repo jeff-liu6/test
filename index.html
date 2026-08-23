@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>婚禮邀請函 | Wedding Invitation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#FBF8F3;
+    --tiffany-wash:#EAF6F4;
+    --tiffany:#7FD1C6;
+    --tiffany-deep:#0E6B63;
+    --tiffany-darker:#0A4F49;
+    --silver:#EDECE8;
+    --silver-hi:#FFFFFF;
+    --silver-lo:#C7C6C1;
+    --ink:#2C3B39;
+    --ink-soft:#5B6B68;
+    --gold:#B79968;
+    --gold-soft:#D9C79E;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:'Noto Sans TC', sans-serif;
+    overflow-x:hidden;
+  }
+  body.locked{overflow:hidden; height:100vh;}
+
+  .eyebrow{
+    font-family:'Jost', sans-serif;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    font-size:.72rem;
+    color:var(--tiffany-deep);
+  }
+
+  /* ---------------- Wax seal icon (signature motif) ---------------- */
+  .seal-icon-svg{ display:block; width:100%; height:100%; }
+  .seal-icon-svg path{ fill:none; stroke:var(--gold-soft); stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
+  .seal-icon-svg .heart{ fill:var(--gold-soft); stroke:none; }
+  .seal-icon-svg .spark{ stroke-width:2; }
+
+  /* ================= ENVELOPE SCREEN ================= */
+  #envelope-screen{
+    position:fixed; inset:0; z-index:999;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(120% 90% at 50% 0%, #ffffff 0%, var(--silver) 45%, #E2E1DC 100%);
+    transition:opacity 1s ease, visibility 1s ease;
+  }
+  #envelope-screen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+
+  .env-caption{
+    position:absolute; top:12%; left:50%; transform:translateX(-50%);
+    text-align:center; width:100%;
+  }
+  .env-caption .names{
+    font-family:'Noto Serif TC', serif;
+    font-weight:500;
+    font-size:clamp(1.3rem,4vw,1.9rem);
+    color:var(--ink);
+    letter-spacing:.08em;
+  }
+  .env-caption .ampersand{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:var(--tiffany-deep);
+    margin:0 .4em;
+  }
+
+  .envelope-wrap{
+    position:relative;
+    width:min(360px, 78vw);
+    aspect-ratio:3/2;
+    perspective:1200px;
+  }
+
+  .envelope-back{
+    position:absolute; inset:0;
+    border-radius:6px;
+    background:linear-gradient(160deg,#FFFFFF 0%, var(--silver) 55%, #DEDDD8 100%);
+    box-shadow:0 30px 60px -20px rgba(20,40,38,.35), 0 8px 20px -8px rgba(20,40,38,.2);
+  }
+  .envelope-back::before{ /* bottom V fold lines */
+    content:"";
+    position:absolute; inset:0;
+    background:
+      linear-gradient(155deg, transparent 49.6%, rgba(0,0,0,.05) 50%, transparent 50.4%),
+      linear-gradient(25deg, transparent 49.6%, rgba(0,0,0,.05) 50%, transparent 50.4%);
+    border-radius:6px;
+  }
+
+  .envelope-card{
+    position:absolute;
+    left:8%; right:8%;
+    top:14%;
+    height:78%;
+    background:var(--ivory);
+    border-radius:3px;
+    box-shadow:0 10px 25px -10px rgba(20,40,38,.3);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px;
+    z-index:2;
+    transform:translateY(6%);
+    opacity:0;
+    transition:transform 1s cubic-bezier(.22,.9,.32,1) .55s, opacity .8s ease .55s;
+    text-align:center;
+    padding:10px;
+  }
+  .envelope-wrap.is-open .envelope-card{
+    transform:translateY(-46%);
+    opacity:1;
+  }
+  .envelope-card .card-line{ width:34px; height:1px; background:var(--gold-soft); }
+  .envelope-card .card-title{
+    font-family:'Cormorant Garamond', serif;
+    font-size:clamp(1.1rem,3.4vw,1.4rem);
+    letter-spacing:.06em;
+    color:var(--tiffany-darker);
+  }
+
+  .enter-btn{
+    font-family:'Jost', sans-serif;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    font-size:.78rem;
+    color:var(--ivory);
+    background:linear-gradient(135deg, var(--tiffany-deep), var(--tiffany-darker));
+    border:none;
+    padding:13px 26px;
+    border-radius:999px;
+    cursor:pointer;
+    box-shadow:0 10px 20px -8px rgba(14,107,99,.55);
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity .7s ease 1.15s, transform .7s ease 1.15s, box-shadow .3s ease, transform .2s ease;
+  }
+  .envelope-wrap.is-open .enter-btn{ opacity:1; transform:translateY(0); }
+  .enter-btn:hover{ box-shadow:0 14px 26px -8px rgba(14,107,99,.65); transform:translateY(-2px); }
+  .enter-btn:active{ transform:translateY(0); }
+
+  .envelope-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:66%;
+    clip-path:polygon(0 0, 100% 0, 50% 100%);
+    background:linear-gradient(160deg, #FFFFFF 0%, var(--silver) 55%, #DAD9D4 100%);
+    transform-origin:top center;
+    transform:rotateX(0deg);
+    transition:transform 1.1s cubic-bezier(.6,.02,.3,1) .35s;
+    z-index:4;
+    box-shadow:0 2px 10px rgba(20,40,38,.08);
+    backface-visibility:hidden;
+  }
+  .envelope-wrap.is-open .envelope-flap{ transform:rotateX(-178deg); }
+
+  .seal{
+    position:absolute;
+    left:50%; top:30%;
+    width:64px; height:64px;
+    transform:translate(-50%,-50%);
+    z-index:6;
+    cursor:pointer;
+  }
+  .seal-half{
+    position:absolute; inset:0;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #12857B, var(--tiffany-deep) 55%, var(--tiffany-darker) 100%);
+    box-shadow:0 6px 14px -4px rgba(10,50,45,.55), inset 0 0 0 1px rgba(255,255,255,.12);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .7s cubic-bezier(.3,.7,.4,1) .05s, opacity .6s ease .1s;
+  }
+  .seal-left{ clip-path:inset(0 50% 0 0); }
+  .seal-right{ clip-path:inset(0 0 0 50%); }
+  .seal-icon{ position:absolute; width:60%; height:60%; }
+  .envelope-wrap.is-open .seal-left{ transform:translate(-14px,-8px) rotate(-18deg); opacity:0; }
+  .envelope-wrap.is-open .seal-right{ transform:translate(14px,8px) rotate(18deg); opacity:0; }
+
+  .tap-hint{
+    position:absolute; bottom:9%; left:50%; transform:translateX(-50%);
+    font-family:'Jost', sans-serif; font-size:.68rem; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--ink-soft);
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  .envelope-wrap.is-open ~ .tap-hint, .envelope-wrap.is-open .tap-hint{ opacity:0; }
+  @keyframes pulse{ 0%,100%{opacity:.45;} 50%{opacity:1;} }
+
+  /* ================= MAIN CONTENT ================= */
+  main{ position:relative; }
+
+  .section{
+    padding:90px 22px;
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center;
+  }
+  .section.tiffany-tint{ background:linear-gradient(180deg, var(--tiffany-wash), var(--ivory)); }
+  .section-inner{ width:100%; max-width:640px; }
+
+  .divider{
+    width:34px; height:34px; margin:0 auto 22px;
+    opacity:.85;
+  }
+
+  .reveal{ opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s ease; }
+  .reveal.in-view{ opacity:1; transform:translateY(0); }
+
+  /* --- Hero / photo section --- */
+  .hero-title{
+    font-family:'Noto Serif TC', serif;
+    font-weight:500;
+    font-size:clamp(1.8rem,6vw,2.6rem);
+    letter-spacing:.05em;
+    margin:10px 0 4px;
+  }
+  .hero-en{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:var(--tiffany-deep);
+    font-size:clamp(1rem,3vw,1.3rem);
+    margin-bottom:36px;
+  }
+
+  .photo-placeholder{
+    width:100%;
+    aspect-ratio:4/5;
+    max-width:420px;
+    margin:0 auto;
+    border:1.5px dashed var(--silver-lo);
+    border-radius:10px;
+    background:linear-gradient(160deg, #ffffff, var(--tiffany-wash));
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:12px;
+    color:var(--ink-soft);
+  }
+  .photo-placeholder svg{ width:38px; height:38px; opacity:.55; }
+  .photo-placeholder span{ font-family:'Jost', sans-serif; letter-spacing:.14em; font-size:.78rem; text-transform:uppercase; }
+  .photo-placeholder small{ font-size:.72rem; opacity:.75; }
+  /* 之後放婚紗照：可將此區塊替換為 <img class="photo-placeholder" src="你的照片.jpg"> 或於 CSS 加上 background-image */
+
+  .hero-quote{
+    margin-top:34px;
+    font-family:'Noto Serif TC', serif;
+    font-size:1rem;
+    line-height:2;
+    color:var(--ink-soft);
+  }
+
+  /* --- Wedding info section --- */
+  .date-display{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:500;
+    font-size:clamp(2.6rem,9vw,3.6rem);
+    color:var(--tiffany-darker);
+    letter-spacing:.04em;
+    line-height:1;
+    margin:14px 0 2px;
+  }
+  .date-sub{
+    font-family:'Jost', sans-serif;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    font-size:.8rem;
+    color:var(--ink-soft);
+    margin-bottom:30px;
+  }
+
+  .venue-name{
+    font-family:'Noto Serif TC', serif;
+    font-size:1.25rem;
+    margin-bottom:4px;
+  }
+  .venue-addr{ font-size:.92rem; color:var(--ink-soft); margin-bottom:22px; }
+
+  .map-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Jost', sans-serif; letter-spacing:.14em; text-transform:uppercase;
+    font-size:.78rem;
+    color:var(--tiffany-darker);
+    background:#fff;
+    border:1.4px solid var(--tiffany);
+    padding:11px 22px;
+    border-radius:999px;
+    text-decoration:none;
+    transition:background .3s ease, color .3s ease, transform .2s ease;
+    margin-bottom:46px;
+  }
+  .map-btn:hover{ background:var(--tiffany-deep); color:#fff; transform:translateY(-2px); }
+  .map-btn svg{ width:15px; height:15px; }
+
+  /* countdown */
+  .countdown{
+    display:flex; justify-content:center; gap:14px;
+    margin-bottom:48px; flex-wrap:wrap;
+  }
+  .countdown .unit{
+    background:#fff;
+    border:1px solid var(--tiffany-wash);
+    box-shadow:0 10px 20px -14px rgba(14,107,99,.4);
+    border-radius:10px;
+    width:68px; padding:12px 0;
+  }
+  .countdown .num{
+    font-family:'Cormorant Garamond', serif;
+    font-size:1.7rem; color:var(--tiffany-darker); font-weight:600; line-height:1;
+  }
+  .countdown .lab{
+    display:block; margin-top:6px;
+    font-family:'Jost', sans-serif; font-size:.62rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--ink-soft);
+  }
+
+  /* timeline */
+  .timeline{
+    position:relative;
+    max-width:320px; margin:0 auto;
+    padding-left:26px;
+    text-align:left;
+  }
+  .timeline::before{
+    content:""; position:absolute; left:6px; top:6px; bottom:6px; width:1px;
+    background:linear-gradient(var(--tiffany), var(--tiffany-deep));
+  }
+  .t-item{ position:relative; padding-bottom:28px; }
+  .t-item:last-child{ padding-bottom:0; }
+  .t-item::before{
+    content:""; position:absolute; left:-26px; top:3px; width:11px; height:11px;
+    border-radius:50%; background:var(--tiffany-deep);
+    box-shadow:0 0 0 4px var(--tiffany-wash);
+  }
+  .t-time{ font-family:'Cormorant Garamond', serif; font-size:1.3rem; color:var(--tiffany-darker); }
+  .t-label{ font-size:.86rem; color:var(--ink-soft); }
+
+  /* --- RSVP section --- */
+  .rsvp-box{
+    width:100%;
+    min-height:260px;
+    border:1.5px dashed var(--silver-lo);
+    border-radius:12px;
+    background:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px;
+    padding:30px 20px;
+    color:var(--ink-soft);
+  }
+  .rsvp-box span{ font-family:'Jost', sans-serif; letter-spacing:.14em; font-size:.78rem; text-transform:uppercase; }
+  /* 出席調查表：稍後將 HTML 嵌入碼貼在下方 id="rsvp-embed" 的容器內，取代此提示文字即可 */
+
+  footer{
+    padding:60px 22px 80px;
+    text-align:center;
+  }
+  .footer-line{
+    font-family:'Noto Serif TC', serif;
+    font-size:1rem;
+    color:var(--ink-soft);
+    letter-spacing:.05em;
+    line-height:2;
+  }
+
+  /* ---- music toggle ---- */
+  #music-toggle{
+    position:fixed; right:18px; bottom:18px; z-index:50;
+    width:46px; height:46px; border-radius:50%;
+    background:#fff; border:1px solid var(--tiffany-wash);
+    box-shadow:0 8px 20px -8px rgba(14,107,99,.4);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  #music-toggle svg{ width:20px; height:20px; color:var(--tiffany-deep); }
+  #music-toggle .bar{ width:3px; background:var(--tiffany-deep); margin:0 1.5px; border-radius:2px; animation:eq 1s ease-in-out infinite; }
+  #music-toggle.paused .bar{ animation-play-state:paused; height:5px !important; }
+  @keyframes eq{ 0%,100%{height:6px;} 50%{height:16px;} }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body class="locked">
+
+<!-- ============ ENVELOPE INTRO SCREEN ============ -->
+<div id="envelope-screen">
+  <div class="env-caption">
+    <div class="eyebrow">You're Invited</div>
+    <div class="names">新郎姓名<span class="ampersand">&amp;</span>新娘姓名</div>
+  </div>
+
+  <div class="envelope-wrap" id="envelopeWrap">
+    <div class="envelope-back"></div>
+
+    <div class="envelope-card">
+      <div class="card-line"></div>
+      <div class="card-title">Wedding Invitation</div>
+      <button class="enter-btn" id="enterBtn">Wedding Invitation</button>
+    </div>
+
+    <div class="envelope-flap"></div>
+
+    <div class="seal" id="sealBtn" aria-label="點擊拆信封">
+      <div class="seal-half seal-left">
+        <svg class="seal-icon seal-icon-svg" viewBox="0 0 100 100">
+          <path d="M12,50 Q50,18 88,50 Q50,82 12,50 Z"/>
+          <path class="heart" d="M50,58 C50,58 39,49 39,42 C39,36 46,34 50,41 C54,34 61,36 61,42 C61,49 50,58 50,58 Z"/>
+          <path class="spark" d="M70,26 L76,20 M76,28 L84,25 M72,34 L80,34"/>
+        </svg>
+      </div>
+      <div class="seal-half seal-right">
+        <svg class="seal-icon seal-icon-svg" viewBox="0 0 100 100">
+          <path d="M12,50 Q50,18 88,50 Q50,82 12,50 Z"/>
+          <path class="heart" d="M50,58 C50,58 39,49 39,42 C39,36 46,34 50,41 C54,34 61,36 61,42 C61,49 50,58 50,58 Z"/>
+          <path class="spark" d="M70,26 L76,20 M76,28 L84,25 M72,34 L80,34"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="tap-hint">Tap the seal to open</div>
+</div>
+
+<!-- ============ MAIN SCROLLABLE CONTENT ============ -->
+<main>
+
+  <!-- ---- Section 1: Hero / 婚紗照預留區 ---- -->
+  <section class="section">
+    <div class="section-inner reveal">
+      <div class="eyebrow">Save The Date</div>
+      <h1 class="hero-title">新郎姓名 &amp; 新娘姓名</h1>
+      <p class="hero-en">Together With Their Families</p>
+
+      <!-- 婚紗照預留位置：之後可將下方 div 換成 <img class="photo-placeholder" src="您的照片.jpg" alt="婚紗照"> -->
+      <div class="photo-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M8 6l1.5-2h5L16 6"/><circle cx="12" cy="13" r="3.2"/></svg>
+        <span>Photo Coming Soon</span>
+        <small>婚紗照預留位置</small>
+      </div>
+
+      <p class="hero-quote">相遇是一見鍾情的緣分<br>相守是一生一世的承諾</p>
+    </div>
+  </section>
+
+  <!-- ---- Section 2: 婚禮資訊 ---- -->
+  <section class="section tiffany-tint">
+    <div class="section-inner reveal">
+      <div class="divider">
+        <svg class="seal-icon-svg" viewBox="0 0 100 100" style="filter:none;">
+          <path d="M12,50 Q50,18 88,50 Q50,82 12,50 Z" stroke="#0E6B63"/>
+          <path class="heart" d="M50,58 C50,58 39,49 39,42 C39,36 46,34 50,41 C54,34 61,36 61,42 C61,49 50,58 50,58 Z" fill="#0E6B63"/>
+        </svg>
+      </div>
+      <div class="eyebrow">Wedding Day</div>
+      <div class="date-display">06 · 12 · 2027</div>
+      <div class="date-sub">Saturday</div>
+
+      <div class="venue-name">尚順君樂飯店 4F 星輝廳</div>
+      <div class="venue-addr">敬請蒞臨，共同見證這一刻</div>
+
+      <a class="map-btn" href="https://maps.app.goo.gl/UK2PMzypW8uQGkNV8" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
+        開啟 Google 地圖導航
+      </a>
+
+      <div class="countdown" id="countdown">
+        <div class="unit"><div class="num" id="cd-d">00</div><span class="lab">Days</span></div>
+        <div class="unit"><div class="num" id="cd-h">00</div><span class="lab">Hours</span></div>
+        <div class="unit"><div class="num" id="cd-m">00</div><span class="lab">Min</span></div>
+        <div class="unit"><div class="num" id="cd-s">00</div><span class="lab">Sec</span></div>
+      </div>
+
+      <div class="timeline">
+        <div class="t-item"><div class="t-time">12:00</div><div class="t-label">賓客入席</div></div>
+        <div class="t-item"><div class="t-time">12:30</div><div class="t-label">婚宴開席</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---- Section 3: RSVP 出席調查（預留區） ---- -->
+  <section class="section">
+    <div class="section-inner reveal">
+      <div class="divider">
+        <svg class="seal-icon-svg" viewBox="0 0 100 100">
+          <path d="M12,50 Q50,18 88,50 Q50,82 12,50 Z" stroke="#0E6B63"/>
+          <path class="heart" d="M50,58 C50,58 39,49 39,42 C39,36 46,34 50,41 C54,34 61,36 61,42 C61,49 50,58 50,58 Z" fill="#0E6B63"/>
+        </svg>
+      </div>
+      <div class="eyebrow">RSVP</div>
+      <h2 class="hero-title" style="font-size:1.5rem;">敬候佳音</h2>
+      <p class="venue-addr" style="margin-bottom:26px;">請於下方回覆您的出席資訊，讓我們能更好地為您安排座位</p>
+
+      <!-- ⬇⬇⬇ 之後請將出席調查表的 HTML 嵌入碼，直接貼在下方 id="rsvp-embed" 容器內 ⬇⬇⬇ -->
+      <div class="rsvp-box" id="rsvp-embed">
+        <span>RSVP Form</span>
+        <div>出席調查表預留位置</div>
+      </div>
+      <!-- ⬆⬆⬆ 嵌入碼貼上後，可直接刪除上面的提示文字 ⬆⬆⬆ -->
+    </div>
+  </section>
+
+  <footer>
+    <div class="divider">
+      <svg class="seal-icon-svg" viewBox="0 0 100 100">
+        <path d="M12,50 Q50,18 88,50 Q50,82 12,50 Z" stroke="#0E6B63"/>
+        <path class="heart" d="M50,58 C50,58 39,49 39,42 C39,36 46,34 50,41 C54,34 61,36 61,42 C61,49 50,58 50,58 Z" fill="#0E6B63"/>
+      </svg>
+    </div>
+    <p class="footer-line">誠摯邀請您<br>一同見證我們故事的開始</p>
+  </footer>
+</main>
+
+<!-- ---- 背景音樂開關（之後請將 audio 的 src 換成您提供的音樂連結） ---- -->
+<audio id="bgm" loop preload="none">
+  <!-- <source src="your-music-file.mp3" type="audio/mpeg"> -->
+</audio>
+<div id="music-toggle" class="paused" aria-label="播放/暫停背景音樂">
+  <div class="bar" style="height:6px"></div><div class="bar" style="height:6px"></div><div class="bar" style="height:6px"></div>
+</div>
+
+<script>
+  // ---------- 信封開啟互動 ----------
+  const envelopeWrap = document.getElementById('envelopeWrap');
+  const sealBtn = document.getElementById('sealBtn');
+  const enterBtn = document.getElementById('enterBtn');
+  const envelopeScreen = document.getElementById('envelope-screen');
+
+  sealBtn.addEventListener('click', () => {
+    envelopeWrap.classList.add('is-open');
+  });
+
+  enterBtn.addEventListener('click', () => {
+    envelopeScreen.classList.add('hide');
+    document.body.classList.remove('locked');
+    setTimeout(() => {
+      document.querySelector('main').scrollIntoView({behavior:'smooth'});
+    }, 150);
+  });
+
+  // ---------- 滾動淡入 ----------
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in-view'); } });
+  }, { threshold: 0.18 });
+  revealEls.forEach(el => io.observe(el));
+
+  // ---------- 倒數計時（請視需要調整時區/日期）----------
+  const weddingDate = new Date('2027-06-12T12:00:00+08:00').getTime();
+  function updateCountdown(){
+    const now = Date.now();
+    const diff = Math.max(0, weddingDate - now);
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
+    document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+    document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // ---------- 背景音樂開關 ----------
+  const musicToggle = document.getElementById('music-toggle');
+  const bgm = document.getElementById('bgm');
+  musicToggle.addEventListener('click', () => {
+    if(!bgm.querySelector('source') || !bgm.querySelector('source').src){
+      musicToggle.style.opacity = '0.4';
+      return; // 尚未提供音樂連結
+    }
+    if(bgm.paused){ bgm.play(); musicToggle.classList.remove('paused'); }
+    else{ bgm.pause(); musicToggle.classList.add('paused'); }
+  });
+</script>
+
+</body>
+</html>
